@@ -1,8 +1,33 @@
-var builder = WebApplication.CreateBuilder(args);
+using Odyssey.MusicMatcher;
+using SpotifyWeb;
 
-builder.Services.AddGraphQLServer();
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpClient<SpotifyService>();
+
+builder
+    .Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
+    .RegisterService<SpotifyService>();
+
+builder
+    .Services
+    .AddCors(options =>
+    {
+        options.AddDefaultPolicy(builder =>
+        {
+            builder
+                .WithOrigins("https://studio.apollographql.com")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
 
 var app = builder.Build();
+
+app.UseCors();
 
 app.MapGraphQL();
 
